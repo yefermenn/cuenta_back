@@ -6,10 +6,16 @@ import { databaseConfig } from './config/database.config';
 import { UsersModule } from './modules/users/users.module';
 import { ProductsModule } from './modules/products/products.module';
 import { SalesModule } from './modules/sales/sales.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     TypeOrmModule.forRoot(databaseConfig()),
+    AuthModule,
     UsersModule,
     ProductsModule,
     SalesModule,
