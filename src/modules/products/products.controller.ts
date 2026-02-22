@@ -11,6 +11,7 @@ import {
   ValidationPipe,
   Query,
   UseGuards,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -44,7 +45,7 @@ export class ProductsController {
    * Obtener un producto por ID (PÚBLICO)
    */
   @Get(':id')
-  async findOne(@Param('id') id: string): Promise<Product> {
+  async findOne(@Param('id', new ParseIntPipe()) id: number): Promise<Product> {
     return this.productsService.findOne(id);
   }
 
@@ -54,7 +55,7 @@ export class ProductsController {
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
   async update(
-    @Param('id') id: string,
+    @Param('id', new ParseIntPipe()) id: number,
     @Body(ValidationPipe) updateProductDto: UpdateProductDto,
   ): Promise<Product> {
     return this.productsService.update(id, updateProductDto);
@@ -66,7 +67,7 @@ export class ProductsController {
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(JwtAuthGuard)
-  async remove(@Param('id') id: string): Promise<void> {
+  async remove(@Param('id', new ParseIntPipe()) id: number): Promise<void> {
     return this.productsService.remove(id);
   }
 }

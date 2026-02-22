@@ -13,9 +13,9 @@ import { Type } from 'class-transformer';
 import { PaymentMethod } from '../entities/sale.entity';
 
 export class CreateSaleDetailDto {
-  @IsUUID()
+  @IsNumber()
   @IsNotEmpty()
-  productId: string;
+  productId: number;
 
   @IsNumber()
   @Min(1)

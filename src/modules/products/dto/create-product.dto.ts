@@ -12,10 +12,15 @@ export class CreateProductDto {
   @IsNotEmpty()
   nombre: string;
 
-  @IsNumber({ maxDecimalPlaces: 2 })
+  @IsNumber()
   @IsPositive()
   @IsNotEmpty()
-  precio: number;
+  precioCompra: number;
+
+  @IsNumber()
+  @IsPositive()
+  @IsNotEmpty()
+  precioVenta: number;
 
   @IsString()
   @IsNotEmpty()
@@ -27,6 +32,5 @@ export class CreateProductDto {
   inventario: number;
 
   @IsUUID()
-  @IsNotEmpty()
   userId: string;
 }

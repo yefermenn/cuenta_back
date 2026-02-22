@@ -15,14 +15,17 @@ import { SaleDetail } from '../../sales/entities/sale-detail.entity';
 @Entity('products')
 @Index(['user', 'codigo'], { unique: true })
 export class Product {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn()
+  id: number;
 
   @Column({ type: 'varchar', length: 255 })
   nombre: string;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
-  precio: number;
+  @Column({ type: 'int'})
+  precioCompra: number;
+
+  @Column({ type: 'int'})
+  precioVenta: number;
 
   @Column({ type: 'varchar', length: 50 })
   codigo: string; // SKU

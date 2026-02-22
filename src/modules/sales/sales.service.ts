@@ -59,14 +59,14 @@ export class SalesService {
       }
 
       // Calcular subtotal
-      const subtotal = Number(product.precio) * item.cantidad;
+      const subtotal = Number(product.precioVenta) * item.cantidad;
       totalVenta += subtotal;
 
       // Crear detalle de venta
       const saleDetail = this.saleDetailsRepository.create({
         productId: product.id,
         cantidad: item.cantidad,
-        precio_unitario: product.precio,
+        precio_unitario: product.precioVenta,
         subtotal,
       });
 

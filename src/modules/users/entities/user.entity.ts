@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import { Product } from '../../products/entities/product.entity';
 import { Sale } from '../../sales/entities/sale.entity';
+import { Compra } from '../../compra/entities/compra.entity';
 
 @Entity('users')
 @Index(['email'], { unique: true })
@@ -25,6 +26,12 @@ export class User {
   @Column({ type: 'varchar', length: 255 })
   password: string;
 
+  @Column({ type: 'boolean', default:false})
+  shift: boolean;
+
+  @Column({ type: 'int', default:0})
+  base: number;
+
   @CreateDateColumn()
   createdAt: Date;
 
@@ -37,4 +44,7 @@ export class User {
 
   @OneToMany(() => Sale, (sale) => sale.user, { cascade: true })
   sales: Sale[];
+
+  @OneToMany(() => Compra, (compra) => compra.user, { cascade: true })
+  compras: Compra[];
 }

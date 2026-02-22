@@ -42,6 +42,6 @@ export class SaleDetail {
   @JoinColumn({ name: 'productId' })
   product: Product;
 
-  @Column({ type: 'uuid' })
-  productId: string;
+  @Column({ type: 'int' })
+  productId: number;
 }

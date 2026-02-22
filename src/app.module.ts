@@ -6,6 +6,7 @@ import { databaseConfig } from './config/database.config';
 import { UsersModule } from './modules/users/users.module';
 import { ProductsModule } from './modules/products/products.module';
 import { SalesModule } from './modules/sales/sales.module';
+import { CompraModule } from './modules/compra/compra.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 
@@ -19,6 +20,7 @@ import { ConfigModule } from '@nestjs/config';
     UsersModule,
     ProductsModule,
     SalesModule,
+    CompraModule,
   ],
   controllers: [AppController],
   providers: [AppService],

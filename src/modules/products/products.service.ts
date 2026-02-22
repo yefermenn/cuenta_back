@@ -46,7 +46,7 @@ export class ProductsService {
     return query.leftJoinAndSelect('product.saleDetails', 'saleDetails').getMany();
   }
 
-  async findOne(id: string): Promise<Product> {
+  async findOne(id: number): Promise<Product> {
     const product = await this.productsRepository.findOne({
       where: { id },
       relations: ['user', 'saleDetails'],
@@ -59,7 +59,7 @@ export class ProductsService {
     return product;
   }
 
-  async update(id: string, updateProductDto: UpdateProductDto): Promise<Product> {
+  async update(id: number, updateProductDto: UpdateProductDto): Promise<Product> {
     const product = await this.findOne(id);
 
     // Si se intenta actualizar el código, validar que sea único por usuario
@@ -82,12 +82,12 @@ export class ProductsService {
     return this.productsRepository.save(product);
   }
 
-  async remove(id: string): Promise<void> {
+  async remove(id: number): Promise<void> {
     const product = await this.findOne(id);
     await this.productsRepository.remove(product);
   }
 
-  async decreaseInventory(productId: string, quantity: number): Promise<void> {
+  async decreaseInventory(productId: number, quantity: number): Promise<void> {
     const product = await this.findOne(productId);
 
     if (product.inventario < quantity) {
@@ -100,7 +100,7 @@ export class ProductsService {
     await this.productsRepository.save(product);
   }
 
-  async increaseInventory(productId: string, quantity: number): Promise<void> {
+  async increaseInventory(productId: number, quantity: number): Promise<void> {
     const product = await this.findOne(productId);
     product.inventario += quantity;
     await this.productsRepository.save(product);
