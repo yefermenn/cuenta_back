@@ -15,6 +15,7 @@ import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
+import { Product } from '../products/entities/product.entity';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('users')
@@ -42,6 +43,13 @@ export class UsersController {
   /**
    * Obtener un usuario por ID (PROTEGIDO)
    */
+  @Get(':id/products')
+  @UseGuards(JwtAuthGuard)
+  async findProducts(@Param('id') id: string): Promise<Product[]> {
+    const user = await this.usersService.findOne(id);
+    return user.products;
+  }
+
   @Get(':id')
   @UseGuards(JwtAuthGuard)
   async findOne(@Param('id') id: string){

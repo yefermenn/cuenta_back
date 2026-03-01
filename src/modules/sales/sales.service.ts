@@ -143,7 +143,158 @@ export class SalesService {
       }
     }
 
-    Object.assign(sale, updateSaleDto);
+    // Procesar actualización de detalles de venta si se proporcionan
+    if (updateSaleDto.items !== undefined) {
+      let totalVenta = 0;
+      const newSaleDetails: SaleDetail[] = [];
+      const itemIds = new Set<string>();
+
+      // Procesar cada item en la actualización
+      for (const item of updateSaleDto.items) {
+        // Si no tiene ID, es un nuevo detalle
+        if (!item.id) {
+          if (!item.productId || !item.cantidad) {
+            throw new BadRequestException(
+              'Los nuevos detalles deben incluir productId y cantidad',
+            );
+          }
+
+          const product = await this.productsService.findOne(item.productId);
+
+          // Validar que el producto pertenece al usuario
+          if (product.userId !== sale.userId) {
+            throw new BadRequestException(
+              `El producto ${product.nombre} no pertenece a este usuario`,
+            );
+          }
+
+          // Validar inventario (sumar lo que ya está en otros detalles)
+          const usedInventory = sale.saleDetails.reduce(
+            (sum, detail) => sum + detail.cantidad,
+            0,
+          );
+          if (product.inventario - usedInventory < item.cantidad) {
+            throw new BadRequestException(
+              `Inventario insuficiente para el producto ${product.nombre}. Disponible: ${product.inventario - usedInventory}, Solicitado: ${item.cantidad}`,
+            );
+          }
+
+          // Crear nuevo detalle de venta
+          const subtotal = Number(product.precioVenta) * item.cantidad;
+          totalVenta += subtotal;
+
+          const newDetail = this.saleDetailsRepository.create({
+            productId: product.id,
+            cantidad: item.cantidad,
+            precio_unitario: product.precioVenta,
+            subtotal,
+            saleId: sale.id,
+          });
+
+          newSaleDetails.push(newDetail);
+        } else {
+          // Es un detalle existente
+          itemIds.add(item.id);
+          const existingDetail = sale.saleDetails.find(
+            (detail) => detail.id === item.id,
+          );
+
+          if (!existingDetail) {
+            throw new BadRequestException(
+              `Detalle de venta con ID ${item.id} no encontrado en la venta ${sale.id}`,
+            );
+          }
+
+          // Si se proporciona productId o cantidad, actualizar
+          if (item.productId || item.cantidad) {
+            const productId = item.productId || existingDetail.productId;
+            const cantidad = item.cantidad || existingDetail.cantidad;
+
+            const product = await this.productsService.findOne(productId);
+
+            // Validar que el producto pertenece al usuario
+            if (product.userId !== sale.userId) {
+              throw new BadRequestException(
+                `El producto ${product.nombre} no pertenece a este usuario`,
+              );
+            }
+
+            // Validar inventario restando lo que ya está vendido
+            const oldQuantity = existingDetail.cantidad;
+            const quantityDifference = cantidad - oldQuantity;
+
+            if (product.inventario < quantityDifference) {
+              throw new BadRequestException(
+                `Inventario insuficiente para el producto ${product.nombre}. Disponible: ${product.inventario}, Necesario: ${quantityDifference}`,
+              );
+            }
+
+            // Actualizar inventario
+            if (quantityDifference !== 0) {
+              if (quantityDifference > 0) {
+                await this.productsService.decreaseInventory(
+                  productId,
+                  quantityDifference,
+                );
+              } else {
+                await this.productsService.increaseInventory(
+                  productId,
+                  Math.abs(quantityDifference),
+                );
+              }
+            }
+
+            // Actualizar el detalle
+            existingDetail.productId = productId;
+            existingDetail.cantidad = cantidad;
+            existingDetail.precio_unitario = product.precioVenta;
+            existingDetail.subtotal = Number(product.precioVenta) * cantidad;
+
+            await this.saleDetailsRepository.save(existingDetail);
+          }
+
+          totalVenta += Number(existingDetail.subtotal);
+        }
+      }
+
+      // Eliminar detalles que no están en la lista actualizada
+      const detailsToDelete = sale.saleDetails.filter(
+        (detail) => !itemIds.has(detail.id),
+      );
+
+      for (const detail of detailsToDelete) {
+        // Restaurar inventario
+        await this.productsService.increaseInventory(
+          detail.productId,
+          detail.cantidad,
+        );
+        await this.saleDetailsRepository.remove(detail);
+      }
+
+      // actualizar la colección en memoria para evitar re-inserción por cascada
+      sale.saleDetails = sale.saleDetails.filter(
+        (detail) => itemIds.has(detail.id),
+      );
+
+      // Guardar nuevos detalles
+      for (const newDetail of newSaleDetails) {
+        await this.saleDetailsRepository.save(newDetail);
+        sale.saleDetails.push(newDetail); // añadir a la venta en memoria
+      }
+
+      // Actualizar total de venta
+      sale.total_venta = totalVenta;
+    }
+
+    // Actualizar estado y método de pago si se proporcionan
+    if (updateSaleDto.estado) {
+      sale.estado = updateSaleDto.estado;
+    }
+
+    if (updateSaleDto.metodo_pago) {
+      sale.metodo_pago = updateSaleDto.metodo_pago;
+    }
+
     return this.salesRepository.save(sale);
   }
 

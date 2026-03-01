@@ -16,7 +16,7 @@ export class AuthService {
    * @param loginDto - Email y contraseña del usuario
    * @returns Token JWT
    */
-  async login(loginDto: LoginDto): Promise<{ access_token: string }> {
+  async login(loginDto: LoginDto): Promise<{ access_token: string , detail}> {
     const { email, password } = loginDto;
 
     // Buscar usuario por email
@@ -39,10 +39,20 @@ export class AuthService {
       email: user.email,
     };
 
+    const detail = {
+      id:user.id,
+      nombre: user.nombre,
+      email: user.email,
+      shift: user.shift,
+      base: user.base,
+      products: user.products,
+      sales: user.sales,
+    };
     const access_token = this.jwtService.sign(payload);
 
     return {
       access_token,
+      detail
     };
   }
 

@@ -11,21 +11,26 @@ export class UpdateProductDto {
   @IsString()
   @IsOptional()
   nombre?: string;
-
-  @IsNumber({ maxDecimalPlaces: 2 })
+  
+  @IsNumber()
   @IsPositive()
   @IsOptional()
-  precio?: number;
+  precioCompra?: number;
+  
+  @IsNumber()
+  @IsPositive()
+  @IsOptional()
+  precioVenta?: number;
 
   @IsString()
   @IsOptional()
   codigo?: string; // SKU
-
+  
   @IsNumber()
   @Min(0)
   @IsOptional()
   inventario?: number;
-
+  
   @IsUUID()
   @IsOptional()
   userId?: string;

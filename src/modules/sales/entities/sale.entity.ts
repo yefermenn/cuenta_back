@@ -19,9 +19,7 @@ export enum SaleStatus {
 
 export enum PaymentMethod {
   CASH = 'efectivo',
-  CARD = 'tarjeta',
-  TRANSFER = 'transferencia',
-  OTHER = 'otro',
+  NEQUI = 'nequi'
 }
 
 @Entity('sales')
